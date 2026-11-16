@@ -1,0 +1,18 @@
+parameters:
+    app.token_ttl: 28800 # durée de vie du jeton : 8 h
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Security\TokenService:
+        arguments:
+            $secret: '%kernel.secret%'
+            $ttl: '%app.token_ttl%'

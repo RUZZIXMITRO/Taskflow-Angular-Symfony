@@ -1,0 +1,30 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\InMemoryUser: 'auto'
+
+    # Utilisateurs de démonstration (mots de passe hachés en bcrypt) :
+    #   admin / admin123 → ROLE_ADMIN
+    #   user  / user123  → ROLE_USER
+    providers:
+        users_in_memory:
+            memory:
+                users:
+                    admin: { password: '$2y$10$tqjdANA7HaHZFMlW/Yq1wuaGhQ2B99Y4bmQpstb80hk7UGikk9iea', roles: ['ROLE_ADMIN'] }
+                    user: { password: '$2y$10$ZR2qplF1mCsnW.6JRZmImOGJYBUEGMqGAs8qFIWQdgSZ6FTd3R3FS', roles: ['ROLE_USER'] }
+
+    firewalls:
+        login:
+            pattern: ^/api/login$
+            security: false
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: users_in_memory
+            # Lit l'en-tête "Authorization: Bearer <jeton>" ajouté par l'intercepteur Angular
+            access_token:
+                token_handler: App\Security\ApiTokenHandler
+
+    # Décision finale côté serveur, sur chaque requête :
+    #   pas de jeton / jeton invalide → 401 · connecté sans ROLE_ADMIN → 403
+    access_control:
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
