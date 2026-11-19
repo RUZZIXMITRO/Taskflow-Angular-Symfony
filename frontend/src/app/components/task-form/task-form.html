@@ -1,0 +1,52 @@
+<form [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <div class="field">
+    <label for="title">Titre *</label>
+    <input id="title" type="text" formControlName="title" autocomplete="off"
+           [attr.aria-invalid]="showError('title')" aria-describedby="title-error" />
+    <div id="title-error" aria-live="polite">
+      @if (showError('title')) {
+        @if (title.hasError('required')) {
+          <p class="error">Le titre est obligatoire.</p>
+        } @else if (title.hasError('minlength')) {
+          <p class="error">3 caractères minimum ({{ title.value.length }}/3).</p>
+        } @else if (title.hasError('maxlength')) {
+          <p class="error">120 caractères maximum.</p>
+        }
+      }
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="description">Description</label>
+    <textarea id="description" rows="3" formControlName="description"></textarea>
+    @if (showError('description')) {
+      <p class="error">1000 caractères maximum.</p>
+    }
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="priority">Priorité</label>
+      <select id="priority" formControlName="priority">
+        @for (p of priorities; track p[0]) {
+          <option [value]="p[0]">{{ p[1] }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="dueDate">Date limite</label>
+      <input id="dueDate" type="date" formControlName="dueDate" />
+    </div>
+  </div>
+
+  @if (task()) {
+    <label class="checkbox">
+      <input type="checkbox" formControlName="completed" /> Terminée
+    </label>
+  }
+
+  <button type="submit" class="btn btn--primary" [disabled]="form.invalid || submitting()">
+    {{ submitting() ? 'Enregistrement…' : submitLabel() }}
+  </button>
+</form>

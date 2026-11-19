@@ -1,0 +1,29 @@
+<article class="card" [class.card--done]="task().completed">
+  <input
+    type="checkbox"
+    class="card__check"
+    [checked]="task().completed"
+    (change)="toggled.emit(task())"
+    [attr.aria-label]="(task().completed ? 'Marquer comme non terminée : ' : 'Marquer comme terminée : ') + task().title"
+  />
+
+  <div class="card__body">
+    <a class="card__title" [routerLink]="['/tasks', task().id]">{{ task().title | uppercase }}</a>
+    <div class="card__meta">
+      <span class="badge badge--{{ task().priority }}">{{ priorityLabel() }}</span>
+      @if (task().dueDate) {
+        <span [class.overdue]="isOverdue()">
+          Échéance : {{ task().dueDate | date: 'dd/MM/yyyy' }}
+          @if (isOverdue()) { <strong>(en retard)</strong> }
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="card__actions">
+    <a class="btn btn--ghost btn--sm" [routerLink]="['/tasks', task().id, 'edit']"
+       [attr.aria-label]="'Modifier ' + task().title">Modifier</a>
+    <button type="button" class="btn btn--danger btn--sm" (click)="deleted.emit(task())"
+            [attr.aria-label]="'Supprimer ' + task().title">Supprimer</button>
+  </div>
+</article>
