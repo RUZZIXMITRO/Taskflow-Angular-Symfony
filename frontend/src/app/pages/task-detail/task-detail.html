@@ -1,0 +1,52 @@
+<a routerLink="/tasks" class="back">← Retour à la liste</a>
+
+@if (loading()) {
+  <p class="state" role="status"><span class="spinner"></span> Chargement…</p>
+} @else if (notFound()) {
+  <div class="panel">
+    <h2>Tâche introuvable</h2>
+    <p class="muted">La tâche n°{{ id() }} n’existe pas ou a été supprimée.</p>
+  </div>
+} @else if (error() && !task()) {
+  <div class="alert alert--error" role="alert">
+    <span>{{ error() }}</span>
+    <button type="button" class="btn btn--sm" (click)="load()">Réessayer</button>
+  </div>
+} @else if (task(); as t) {
+  <article class="panel">
+    <div class="page-head">
+      <h2 [class.done]="t.completed">{{ t.title }}</h2>
+      <span class="badge badge--{{ t.priority }}">{{ priorityLabels[t.priority] }}</span>
+    </div>
+
+    @if (error()) {
+      <p class="alert alert--error" role="alert">{{ error() }}</p>
+    }
+
+    <dl class="details">
+      <dt>Statut</dt>
+      <dd>{{ t.completed ? 'Terminée' : 'À faire' }}</dd>
+      <dt>Date limite</dt>
+      <dd>{{ t.dueDate ? (t.dueDate | date: 'dd/MM/yyyy') : '—' }}</dd>
+      <dt>Description</dt>
+      <dd>{{ t.description || '—' }}</dd>
+    </dl>
+
+    <div class="actions">
+      <button type="button" class="btn btn--primary" (click)="toggle()">
+        {{ t.completed ? 'Marquer non terminée' : 'Marquer terminée' }}
+      </button>
+      <a class="btn btn--ghost" [routerLink]="['/tasks', t.id, 'edit']">Modifier</a>
+      <button type="button" class="btn btn--danger" (click)="confirmOpen.set(true)">Supprimer</button>
+    </div>
+  </article>
+
+  <app-modal [open]="confirmOpen()" (closed)="confirmOpen.set(false)">
+    <span modal-title>Supprimer la tâche ?</span>
+    <p>« {{ t.title }} » sera définitivement supprimée.</p>
+    <ng-container modal-actions>
+      <button type="button" class="btn btn--ghost" (click)="confirmOpen.set(false)">Annuler</button>
+      <button type="button" class="btn btn--danger" (click)="remove()">Supprimer</button>
+    </ng-container>
+  </app-modal>
+}

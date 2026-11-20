@@ -1,0 +1,68 @@
+<div class="page-head">
+  <div>
+    <h2>Mes tâches</h2>
+    <p class="muted">{{ count() }} tâche(s) · {{ remaining() }} restante(s)</p>
+  </div>
+  <a routerLink="/tasks/new" class="btn btn--primary">+ Nouvelle tâche</a>
+</div>
+
+<section class="filters" aria-label="Filtres">
+  <div class="field">
+    <label for="search">Rechercher</label>
+    <input id="search" type="search" placeholder="Titre…" [(ngModel)]="query" />
+  </div>
+  <div class="field">
+    <label for="priority-filter">Priorité</label>
+    <select id="priority-filter" [(ngModel)]="priority">
+      <option value="all">Toutes</option>
+      <option value="high">{{ priorityLabels.high }}</option>
+      <option value="medium">{{ priorityLabels.medium }}</option>
+      <option value="low">{{ priorityLabels.low }}</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="status-filter">Statut</label>
+    <select id="status-filter" [(ngModel)]="status">
+      <option value="all">Toutes</option>
+      <option value="active">Non terminées</option>
+      <option value="completed">Terminées</option>
+    </select>
+  </div>
+</section>
+
+@if (actionError()) {
+  <p class="alert alert--error" role="alert">{{ actionError() }}</p>
+}
+
+@if (loading()) {
+  <p class="state" role="status" aria-live="polite"><span class="spinner"></span> Chargement…</p>
+} @else if (error()) {
+  <div class="alert alert--error" role="alert">
+    <span>{{ error() }}</span>
+    <button type="button" class="btn btn--sm" (click)="loadTasks()">Réessayer</button>
+  </div>
+} @else if (tasks().length === 0) {
+  <p class="empty">Aucune tâche pour l’instant. <a routerLink="/tasks/new">Créer la première</a></p>
+} @else {
+  <ul class="task-list">
+    @for (task of filteredTasks(); track task.id) {
+      <li>
+        <app-task-card [task]="task" (toggled)="toggle($event)" (deleted)="toDelete.set($event)" />
+      </li>
+    } @empty {
+      <li class="empty">
+        Aucune tâche ne correspond aux filtres.
+        <button type="button" class="btn btn--ghost btn--sm" (click)="resetFilters()">Réinitialiser</button>
+      </li>
+    }
+  </ul>
+}
+
+<app-modal [open]="!!toDelete()" (closed)="toDelete.set(null)">
+  <span modal-title>Supprimer la tâche ?</span>
+  <p>« {{ toDelete()?.title }} » sera définitivement supprimée.</p>
+  <ng-container modal-actions>
+    <button type="button" class="btn btn--ghost" (click)="toDelete.set(null)">Annuler</button>
+    <button type="button" class="btn btn--danger" (click)="confirmDelete()">Supprimer</button>
+  </ng-container>
+</app-modal>
